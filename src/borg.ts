@@ -96,10 +96,6 @@ class _Builder<T> {
             throw new Error("Not initialised");
         }
     }
-
-    private createAssistant() {
-        return "";
-    }
 }
 
 
@@ -108,7 +104,9 @@ async function promptAndLog(messages: Array<ChatCompletionRequestMessage>): Prom
         model: "gpt-3.5-turbo",
         messages: messages,
     });
+    console.log("==================================================")
     console.log(completion.data.choices[0].message?.content || "");
+    console.log("==================================================")
     return completion.data;
 }
 
