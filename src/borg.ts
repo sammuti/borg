@@ -18,6 +18,8 @@ class Context {
     botName: string;
 
     msgs: Array<ChatCompletionRequestMessage>;
+
+    responses: Array<CreateChatCompletionResponse>
     constructor(botName: string, systemMsg: string, userMsg: string, assistMsg: string) {
         this.botName = botName;
         this.msgs = [
@@ -31,41 +33,43 @@ class Context {
                 role: "assistant", content: `${assistMsg}`,
             }
         ];
+        this.responses = [];
     }
 }
 
 class _Builder<T> {
     private initMsg: Context;
 
-    private context: Context;
+    context: Context;
 
-    private initialised: Boolean = false;
+    initialised: Boolean = false;
 
-    private responses: Array<CreateChatCompletionResponse>
     constructor(initMsg: Context) {
         this.initMsg = initMsg;
         this.context = new Context(this.initMsg.botName, initMsg.msgs[0].content, "", "");
-        this.responses = [];
         return this;
     }
 
     async init(): Promise<Builder1<T>> {
         this.initialised = true;
         let res = await promptAndLog(this.initMsg.msgs);
-        this.responses.push(res);
+        this.context.responses.push(res);
         return this;
     }
 
     async execute(): Promise<Builder1<T>> {
         this.checkInit();
+        // console.log(this.context.msgs);
         let res = await promptAndLog(this.context.msgs);
-        this.responses.push(res);
-        this.context = new Context(this.initMsg.botName, this.initMsg.msgs[0].content, "", "");
-        this.responses.forEach((resp => {
+        this.context.responses.push(res);
+        const newContext = new Context(this.initMsg.botName, this.initMsg.msgs[0].content, "", "");
+        this.context.responses.forEach((resp => {
             if (resp.choices[0].message) {
-                this.context.msgs.push(resp.choices[0].message);
+                newContext.msgs.push(resp.choices[0].message);
             }
-        }))
+        }));
+        newContext.responses = this.context.responses;
+        this.context = newContext;
         return this;
     }
 
@@ -88,7 +92,11 @@ class _Builder<T> {
     }
 
     getResponses(): Array<CreateChatCompletionResponse> {
-        return this.responses;
+        return this.context.responses;
+    }
+
+    getContext(): Context {
+        return this.context;
     }
 
     private checkInit() {
@@ -96,6 +104,14 @@ class _Builder<T> {
             throw new Error("Not initialised");
         }
     }
+
+}
+
+function from<T>(context: Context): Builder1<T> {
+    const builder = new _Builder(context);
+    builder.context = context;
+    builder.initialised = true;
+    return builder;
 }
 
 
@@ -104,12 +120,12 @@ async function promptAndLog(messages: Array<ChatCompletionRequestMessage>): Prom
         model: "gpt-3.5-turbo",
         messages: messages,
     });
-    console.log("==================================================")
-    console.log(completion.data.choices[0].message?.content || "");
-    console.log("==================================================")
+    //console.log("==================================================")
+    //console.log(completion.data.choices[0].message?.content || "");
+    //console.log("==================================================")
     return completion.data;
 }
 
 const Builder: new <T>(initMsg: Context) => Builder0<T> = _Builder;
 
-export {Builder as ChatGptBuilder, Context};
+export {Builder as ChatGptBuilder, Context, from as chatGptFrom};
