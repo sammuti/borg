@@ -1,4 +1,9 @@
 {
+  "name": "borg-chat-ai-client",
+  "version": "0.0.1",
+  "description": "A more fluent client for the OpenAI API",
+  "author": "vim@sammuti.com",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "openai": "^3.2.1"
