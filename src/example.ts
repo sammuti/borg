@@ -11,7 +11,7 @@ const rl = readline.createInterface({
 });
 
 let waitForUserInput = async function() {
-    rl.question("Command: ", async function(answer) {
+    rl.question(": ", async function(answer) {
         if (answer == "exit"){
             rl.close();
         } else {
