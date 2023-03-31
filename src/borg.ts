@@ -101,7 +101,7 @@ class _Builder<T> {
 
 async function promptAndLog(messages: Array<ChatCompletionRequestMessage>): Promise<CreateChatCompletionResponse> {
     const completion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4",
         messages: messages,
     });
     console.log("==================================================")
