@@ -15,8 +15,8 @@ const rl = readline.createInterface({
 // To set environment variables on macOS or Linux, run the export commands below from the terminal:
 // export CONSUMER_KEY='YOUR-KEY'
 // export CONSUMER_SECRET='YOUR-SECRET'
-const consumer_key = process.env.CONSUMER_KEY;
-const consumer_secret = process.env.CONSUMER_SECRET;
+const consumer_key = process.env.TWITTER_CONSUMER_KEY;
+const consumer_secret = process.env.TWITTER_CONSUMER_SECRET;
 
 
 // Be sure to add replace the text of the with the text you wish to Tweet.
@@ -90,10 +90,10 @@ async function accessToken({
 }
 
 
-async function getRequest({
+export async function postTweet({
                               oauth_token,
                               oauth_token_secret
-                          }) {
+                          }, data) {
 
     const token = {
         key: oauth_token,
@@ -123,7 +123,7 @@ async function getRequest({
 }
 
 
-(async () => {
+export async function getOAuthToken() {
     try {
         // Get request token
         const oAuthRequestToken = await requestToken();
@@ -134,13 +134,13 @@ async function getRequest({
         // Get the access token
         const oAuthAccessToken = await accessToken(oAuthRequestToken, pin.trim());
         // Make the request
-        const response = await getRequest(oAuthAccessToken);
-        console.dir(response, {
+        // const response = await getRequest(oAuthAccessToken);
+         console.dir(oAuthAccessToken, {
             depth: null
         });
+        return oAuthAccessToken;
     } catch (e) {
         console.log(e);
         process.exit(-1);
     }
-    process.exit();
-})();
+}
